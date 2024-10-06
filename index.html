@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simon Memory Space Game</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400;700&display=swap');
+
+        body {
+            text-align: center;
+            background-image: url("https://upload.wikimedia.org/wikipedia/commons/e/ee/Vega_star.png");
+            background-size: cover;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Roboto', sans-serif;
+            color: #ffffff;
+        }
+
+        .title {
+            font-size: 4rem;
+            font-family: 'Orbitron', sans-serif;
+            text-align: center;
+            color: #ffffff;
+            text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff, 0 0 30px #00ffff;
+            margin-bottom: 2rem;
+        }
+
+        .machine {
+            width: 450px;
+            height: 450px;
+            position: relative;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 50%;
+            box-shadow: 0 0 50px rgba(0, 255, 255, 0.5);
+        }
+
+        .btnn {
+            position: absolute;
+            display: inline-block;
+            cursor: pointer;
+            border: 10px solid #303030;
+            transition: all 0.3s ease;
+        }
+
+        .clickable { pointer-events: auto; }
+        .unclickable { pointer-events: none; }
+
+        .green-btn {
+            background-color: #04b404;
+            border-top-left-radius: 100%;
+            top: 0;
+            left: 0;
+            width: 50%;
+            height: 50%;
+        }
+
+        .red-btn {
+            background-color: #940505;
+            border-top-right-radius: 100%;
+            top: 0;
+            right: 0;
+            width: 50%;
+            height: 50%;
+        }
+
+        .blue-btn {
+            background-color: #248eff;
+            border-bottom-right-radius: 100%;
+            bottom: 0;
+            right: 0;
+            width: 50%;
+            height: 50%;
+        }
+
+        .yellow-btn {
+            background-color: #dec800;
+            border-bottom-left-radius: 100%;
+            bottom: 0;
+            left: 0;
+            width: 50%;
+            height: 50%;
+        }
+
+        .green-btn.light { background-color: #2efe2e; }
+        .red-btn.light { background-color: #fe2e2e; }
+        .yellow-btn.light { background-color: #f7fe2e; }
+        .blue-btn.light { background-color: #2efef7; }
+
+        .panel {
+            position: absolute;
+            top: 22%;
+            left: 22%;
+            width: 56%;
+            height: 56%;
+            background-color: #303030;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .level-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .screen {
+            font-size: 2rem;
+            font-family: 'Orbitron', sans-serif;
+            text-align: center;
+            background-color: #000000;
+            color: #ff0000;
+            width: 60px;
+            height: 40px;
+            border-radius: 5px;
+            border: none;
+            margin-bottom: 1rem;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+
+        .ctrl-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .start-btn {
+            background: #dc0000;
+        }
+
+        .strict-btn {
+            background: #ffff41;
+        }
+
+        .ctrl-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .switch-panel {
+            display: flex;
+            align-items: center;
+        }
+
+        .switch {
+            width: 60px;
+            height: 30px;
+            background-color: #2e2e2e;
+            border-radius: 15px;
+            margin: 0 10px;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .switch-btn {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background-color: #ffffff;
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            transition: all 0.3s ease;
+        }
+
+        .on .switch-btn {
+            left: 32px;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .pulse {
+            animation: pulse 1s infinite;
+        }
+
+        @media (max-width: 768px) {
+            .machine {
+                width: 300px;
+                height: 300px;
+            }
+            .title {
+                font-size: 2rem;
+            }
+        }
+
+        .btnn:active, .btnn.light {
+            box-shadow: 0 0 20px #fff, 0 0 30px #fff, 0 0 40px #fff, 0 0 50px #fff;
+        }
+
+        .instructions-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            cursor: pointer;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 600px;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="title">Simon Space Game</div>
+
+    <div class="machine">
+        <div class="btnn green-btn unclickable" id='0'></div>
+        <div class="btnn red-btn unclickable" id='1'></div>
+        <div class="btnn yellow-btn unclickable" id='2'></div>
+        <div class="btnn blue-btn unclickable" id='3'></div>
+
+        <div class="panel">
+            <div class="level-title">LEVEL</div>
+            <input id="screen" class="screen" value="--" readonly>
+            <div class="controls">
+                <div>
+                    <button class="ctrl-btn start-btn" id="start"></button>
+                    <div>START</div>
+                </div>
+                <div>
+                    <button class="ctrl-btn strict-btn" id="strict"></button>
+                    <div>STRICT</div>
+                </div>
+            </div>
+            <div class="switch-panel">
+                <span>OFF</span>
+                <div class="switch" id="switch">
+                    <div class="switch-btn"></div>
+                </div>
+                <span>ON</span>
+            </div>
+        </div>
+    </div>
+
+    <audio id="audio0" src="https://s3.amazonaws.com/freecodecamp/simonSound1.mp3"></audio>
+    <audio id="audio1" src="https://s3.amazonaws.com/freecodecamp/simonSound2.mp3"></audio>
+    <audio id="audio2" src="https://s3.amazonaws.com/freecodecamp/simonSound3.mp3"></audio>
+    <audio id="audio3" src="https://s3.amazonaws.com/freecodecamp/simonSound4.mp3"></audio>
+    <audio id="wrong-sound" src="http://themushroomkingdom.net/sounds/wav/smb/smb_mariodie.wav"></audio>
+    <audio id="win-sound" src="http://themushroomkingdom.net/sounds/wav/smb/smb_stage_clear.wav"></audio>
+
+    <button class="instructions-btn">Instructions</button>
+
+    <div id="instructionsModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>How to Play Simon Space Game</h2>
+            <p>1. Press the START button to begin.</p>
+            <p>2. Watch and listen as the game lights up one or more buttons.</p>
+            <p>3. Repeat the pattern by pressing the same buttons in order.</p>
+            <p>4. The game will add one step to the pattern each round.</p>
+            <p>5. If you make a mistake, the game will signal and start over.</p>
+            <p>6. In Strict Mode, any mistake will reset the game to round 1.</p>
+            <p>7. Win by correctly repeating a pattern of 20 steps!</p>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            var level = 0,
+                idNow,
+                isStrict = false,
+                isOn = false,
+                seq = [],
+                userseq = [],
+                timeStep,
+                running = null,
+                waiting = null,
+                now = "";
+
+            function init() {
+                $("#screen").val("--");
+                level = 0;
+                seq = [];
+                idNow = 0;
+                clearInterval(running);
+                clearTimeout(waiting);
+                $(".btnn").removeClass("light");
+                $(".btnn").removeClass("clickable").addClass("unclickable");
+            }
+
+            function reset() {
+                init();
+                isStrict = false;
+                $("#strict").removeClass("pulse");
+            }
+
+            function resetGame() {
+                level = 1;
+                seq = [];
+                $(".btnn").removeClass("light");
+                clearInterval(running);
+                clearTimeout(waiting);
+            }
+
+            function getTimeStep(level) {
+                return 1250 * Math.pow(0.94, level - 1);
+            }
+
+            function addStep() {
+                timeStep = getTimeStep(level);
+                seq.push(Math.floor(Math.random() * 4));
+                playSeq();
+            }
+
+            function displayLevel() {
+                level = seq.length;
+                $("#screen").val((level < 10 ? "0" : "") + level);
+            }
+
+            function play(num) {
+                var audio = document.getElementById("audio" + num);
+                audio.currentTime = 0;
+                audio.playbackRate = 1.9 - timeStep / 1800;
+                audio.play();
+            }
+
+            function light(num) {
+                $("#" + num).addClass("light");
+                play(num);
+                now = "#" + num;
+            }
+
+            function unlight() {
+                $(now).removeClass("light");
+            }
+
+            function playSeq() {
+                var i = 0;
+                idNow = 0;
+                running = setInterval(function() {
+                    light(seq[i]);
+                    displayLevel();
+                    waiting = setTimeout(unlight, timeStep / 2);
+                    i++;
+                    if (i === seq.length) {
+                        clearInterval(running);
+                        $(".btnn").removeClass("unclickable").addClass("clickable");
+                        waiting = setTimeout(error, 5 * timeStep);
+                    }
+                }, timeStep);
+            }
+
+            function error() {
+                $(".btnn").removeClass("clickable").addClass("unclickable");
+                var audio = document.getElementById("wrong-sound");
+                audio.play();
+                $("#screen").val("! !");
+                waiting = setTimeout(function() {
+                    if (isStrict) start();
+                    else playSeq();
+                }, 3000);
+            }
+
+            function win() {
+                var audio = document.getElementById("win-sound");
+                audio.play();
+                $("#screen").val("WIN");
+                $(".btnn").removeClass("clickable").addClass("unclickable");
+            }
+
+            function push(pushBtn) {
+                clearTimeout(waiting);
+                var pushId = pushBtn.attr("id");
+                if (pushId == seq[idNow] && idNow < seq.length) {
+                    light(pushId);
+                    waiting = setTimeout(unlight, timeStep / 2);
+                    idNow++;
+                    if (idNow < seq.length) {
+                        waiting = setTimeout(error, 5 * timeStep);
+                    } else if (idNow === 20) {
+                        win();
+                    } else {
+                        $(".btnn").removeClass("clickable").addClass("unclickable");
+                        waiting = setTimeout(addStep, 1000);
+                    }
+                } else {
+                    error();
+                }
+            }
+
+            $(".btnn").on("click", function() {
+                if ($(this).hasClass("clickable")) {
+                    push($(this));
+                }
+            });
+
+            function start() {
+                if (isOn) {
+                    resetGame();
+                    addStep();
+                }
+            }
+
+            $("#switch").on("click", function() {
+                $(this).toggleClass("on");
+                isOn = $(this).hasClass("on");
+                if (isOn) {
+                    $("#screen").val("--");
+                    reset();
+                } else {
+                    $("#screen").val("");
+                    reset();
+                }
+            });
+
+            $("#start").on("click", start);
+
+            $("#strict").on("click", function() {
+                if (isOn) {
+                    isStrict = !isStrict;
+                    $(this).toggleClass("pulse");
+                }
+            });
+
+            // Instructions modal
+            const modal = $("#instructionsModal");
+            $(".instructions-btn").click(() => modal.css("display", "block"));
+            $(".close").click(() => modal.css("display", "none"));
+            $(window).click(event => {
+                if (event.target == modal[0]) modal.css("display", "none");
+            });
+
+            // Keyboard controls
+            $(document).keydown(function(e) {
+                if (!isOn) return;
+                switch(e.which) {
+                    case 81: // Q key
+                        $("#0").click();
+                        break;
+                    case 87: // W key
+                        $("#1").click();
+                        break;
+                    case 65: // A key
+                        $("#2").click();
+                        break;
+                    case 83: // S key
+                        $("#3").click();
+                        break;
+                }
+            });
+        });
+    </script>
+</body>
+</html>
